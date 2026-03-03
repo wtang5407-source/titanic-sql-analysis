@@ -1,0 +1,322 @@
+-- ============================================
+-- Titanic数据SQL探索分析 - 完整查询集
+-- 分析工具：SQLite
+-- 数据来源：Kaggle Titanic数据集（train.csv）
+-- 记录数：891
+-- ============================================
+
+-- ============================================
+-- 第一部分：数据验证与概况
+-- ============================================
+
+-- 1.1 验证数据导入 - 查看表结构
+PRAGMA table_info(passengers);
+
+-- 1.2 查看总行数
+SELECT COUNT(*) AS total_passengers FROM passengers;
+
+-- 1.3 查看前5行数据
+SELECT * FROM passengers LIMIT 5;
+
+-- 1.4 数据完整性统计（各字段缺失情况）
+SELECT 
+    COUNT(*) AS 总人数,
+    COUNT(PassengerId) AS PassengerId非空,
+    COUNT(Survived) AS Survived非空,
+    COUNT(Pclass) AS Pclass非空,
+    COUNT(Name) AS Name非空,
+    COUNT(Sex) AS Sex非空,
+    COUNT(Age) AS Age非空,
+    COUNT(SibSp) AS SibSp非空,
+    COUNT(Parch) AS Parch非空,
+    COUNT(Ticket) AS Ticket非空,
+    COUNT(Fare) AS Fare非空,
+    COUNT(Cabin) AS Cabin非空,
+    COUNT(Embarked) AS Embarked非空
+FROM passengers;
+
+-- 1.5 关键字段缺失率详细统计
+SELECT 
+    'Age' AS 字段,
+    COUNT(*) AS 总行数,
+    COUNT(Age) AS 非空值,
+    COUNT(*) - COUNT(Age) AS 缺失值,
+    ROUND(COUNT(Age) * 100.0 / COUNT(*), 2) AS 完整率百分比
+FROM passengers
+UNION ALL
+SELECT 
+    'Cabin',
+    COUNT(*),
+    COUNT(Cabin),
+    COUNT(*) - COUNT(Cabin),
+    ROUND(COUNT(Cabin) * 100.0 / COUNT(*), 2)
+FROM passengers
+UNION ALL
+SELECT 
+    'Embarked',
+    COUNT(*),
+    COUNT(Embarked),
+    COUNT(*) - COUNT(Embarked),
+    ROUND(COUNT(Embarked) * 100.0 / COUNT(*), 2)
+FROM passengers;
+
+
+-- ============================================
+-- 第二部分：基础分布统计
+-- ============================================
+
+-- 2.1 生还情况分布
+SELECT 
+    Survived,
+    COUNT(*) AS 人数,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM passengers), 2) AS 占比
+FROM passengers
+GROUP BY Survived;
+
+-- 2.2 性别分布
+SELECT 
+    Sex,
+    COUNT(*) AS 人数,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM passengers), 2) AS 占比
+FROM passengers
+GROUP BY Sex;
+
+-- 2.3 舱位分布
+SELECT 
+    Pclass,
+    COUNT(*) AS 人数,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM passengers), 2) AS 占比
+FROM passengers
+GROUP BY Pclass
+ORDER BY Pclass;
+
+-- 2.4 登船港口分布
+SELECT 
+    Embarked,
+    COUNT(*) AS 人数,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM passengers), 2) AS 占比
+FROM passengers
+WHERE Embarked IS NOT NULL
+GROUP BY Embarked;
+
+
+-- ============================================
+-- 第三部分：单变量分析 - 性别
+-- ============================================
+
+-- 3.1 性别对生还率的影响
+SELECT 
+    CASE WHEN Sex = 'male' THEN '男性' ELSE '女性' END AS 性别,
+    COUNT(*) AS 总人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+GROUP BY Sex;
+
+
+-- ============================================
+-- 第四部分：单变量分析 - 舱位
+-- ============================================
+
+-- 4.1 舱位等级对生还率的影响
+SELECT 
+    Pclass AS 舱位等级,
+    COUNT(*) AS 总人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+GROUP BY Pclass
+ORDER BY Pclass;
+
+
+-- ============================================
+-- 第五部分：单变量分析 - 年龄
+-- ============================================
+
+-- 5.1 年龄缺失情况统计
+SELECT 
+    COUNT(*) AS 总人数,
+    COUNT(Age) AS 有年龄记录,
+    COUNT(*) - COUNT(Age) AS 年龄缺失,
+    ROUND(COUNT(Age) * 100.0 / COUNT(*), 2) AS 完整率百分比
+FROM passengers;
+
+-- 5.2 年龄段生还率分析
+SELECT 
+    CASE 
+        WHEN Age IS NULL THEN '未知'
+        WHEN Age <= 12 THEN '儿童(0-12)'
+        WHEN Age <= 18 THEN '青少年(13-18)'
+        WHEN Age <= 35 THEN '青年(19-35)'
+        WHEN Age <= 55 THEN '中年(36-55)'
+        ELSE '老年(55+)'
+    END AS 年龄段,
+    COUNT(*) AS 总人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+GROUP BY 年龄段
+ORDER BY MIN(Age);
+
+
+-- ============================================
+-- 第六部分：单变量分析 - 登船港口
+-- ============================================
+
+-- 6.1 登船港口缺失情况统计
+SELECT 
+    COUNT(*) AS 总人数,
+    COUNT(Embarked) AS 有港口记录,
+    COUNT(*) - COUNT(Embarked) AS 港口缺失,
+    ROUND(COUNT(Embarked) * 100.0 / COUNT(*), 2) AS 完整率百分比
+FROM passengers;
+
+-- 6.2 各港口生还率分析
+SELECT 
+    CASE 
+        WHEN Embarked IS NULL THEN '未知'
+        WHEN Embarked = 'C' THEN '瑟堡(Cherbourg)'
+        WHEN Embarked = 'Q' THEN '皇后镇(Queenstown)'
+        WHEN Embarked = 'S' THEN '南安普顿(Southampton)'
+    END AS 登船港口,
+    COUNT(*) AS 总人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+GROUP BY Embarked
+ORDER BY 生还率百分比 DESC;
+
+
+-- ============================================
+-- 第七部分：多变量分析 - 性别 × 舱位
+-- ============================================
+
+-- 7.1 性别与舱位交叉分析
+SELECT 
+    Pclass AS 舱位,
+    CASE WHEN Sex = 'male' THEN '男性' ELSE '女性' END AS 性别,
+    COUNT(*) AS 总人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+GROUP BY Pclass, Sex
+ORDER BY Pclass, 性别 DESC;
+
+
+-- ============================================
+-- 第八部分：多变量分析 - 年龄 × 舱位
+-- ============================================
+
+-- 8.1 各舱位儿童与成年人对比
+SELECT 
+    Pclass AS 舱位,
+    CASE 
+        WHEN Age <= 12 THEN '儿童(0-12岁)'
+        ELSE '成年人(>12岁)'
+    END AS 人群,
+    COUNT(*) AS 总人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+WHERE Age IS NOT NULL
+GROUP BY Pclass, 人群
+ORDER BY Pclass, 人群;
+
+
+-- ============================================
+-- 第九部分：多变量分析 - 家庭规模
+-- ============================================
+
+-- 9.1 家庭规模对生还率的影响
+SELECT 
+    SibSp + Parch + 1 AS FamilySize,
+    COUNT(*) AS 总人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+GROUP BY FamilySize
+ORDER BY FamilySize;
+
+
+-- ============================================
+-- 第十部分：生还者画像验证
+-- ============================================
+
+-- 10.1 画像A：精英儿童（1等舱+儿童+有家庭）
+SELECT 
+    '画像A：精英儿童' AS 画像,
+    COUNT(*) AS 人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+WHERE Pclass = 1
+  AND Age <= 12
+  AND (SibSp + Parch + 1) > 1;
+
+-- 10.2 画像B：中产家庭女性（2等舱+女性+中等家庭）
+SELECT 
+    '画像B：中产家庭女性' AS 画像,
+    COUNT(*) AS 人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+WHERE Pclass = 2
+  AND Sex = 'female'
+  AND (SibSp + Parch + 1) BETWEEN 2 AND 4;
+
+-- 10.3 画像C：独行青年男性（3等舱+男性+青年+单人）
+SELECT 
+    '画像C：独行青年男性' AS 画像,
+    COUNT(*) AS 人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+WHERE Pclass = 3
+  AND Sex = 'male'
+  AND Age BETWEEN 19 AND 35
+  AND (SibSp + Parch + 1) = 1;
+
+-- 10.4 黄金群体（1等舱+女性+20-40岁+有家庭）
+SELECT 
+    '黄金群体' AS 画像,
+    COUNT(*) AS 人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers
+WHERE Sex = 'female'
+  AND Pclass = 1
+  AND Age BETWEEN 20 AND 40
+  AND (SibSp + Parch + 1) > 1;
+
+-- 10.5 全体乘客对比基准
+SELECT 
+    '全体乘客' AS 画像,
+    COUNT(*) AS 人数,
+    SUM(Survived) AS 生还人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率百分比
+FROM passengers;
+
+
+-- ============================================
+-- 第十一部分：快速验证查询
+-- ============================================
+
+-- 11.1 舱位与舱位分布验证（解释港口差异）
+SELECT 
+    Embarked,
+    Pclass,
+    COUNT(*) AS 人数,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY Embarked), 2) AS 占比
+FROM passengers
+WHERE Embarked IS NOT NULL
+GROUP BY Embarked, Pclass
+ORDER BY Embarked, Pclass;
+
+-- 11.2 儿童性别差异（补充分析）
+SELECT 
+    CASE WHEN Sex = 'male' THEN '男童' ELSE '女童' END AS 性别,
+    COUNT(*) AS 人数,
+    ROUND(AVG(Survived) * 100, 2) AS 生还率
+FROM passengers
+WHERE Age <= 12
+GROUP BY Sex;
