@@ -4,6 +4,7 @@ SQL + Pandas exploratory data analysis of Titanic dataset using SQLite and Pytho
 # Titanic 数据集SQL+Pandas探索性数据分析
 
 ## 📌 项目简介
+
 本项目使用**SQL**和**Pandas**对Titanic数据集进行探索性数据分析，旨在探究"什么样的人更可能在泰坦尼克号沉船事故中生还"。
 
 项目分为两个阶段：
@@ -11,6 +12,8 @@ SQL + Pandas exploratory data analysis of Titanic dataset using SQLite and Pytho
 - **阶段二（Pandas）**：复现SQL分析结果，进行可视化探索，并完成SQL难以实现的高级分析（窗口函数对比、数据透视、特征工程）
 
 通过两种工具的对比实践，总结了SQL与Pandas的适用场景和协同工作流。
+
+**🚀 扩展应用**：本项目的方法论已迁移至医药临床试验分析场景，详见[从Titanic到医药临床试验的分析框架迁移指南](./medical_analysis_framework.md)。
 
 ## 📊 数据集
 - **来源**：[Kaggle Titanic竞赛](https://www.kaggle.com/c/titanic)
@@ -78,6 +81,10 @@ SQL + Pandas exploratory data analysis of Titanic dataset using SQLite and Pytho
 - [可视化图表集: titanic_visualizations/](./titanic_visualizations/) - 6组高清图表（PNG格式）
 - [工具对比指南: sql_vs_pandas_comparison.md](./sql_vs_pandas_comparison.md) - SQL vs Pandas详细对比
 
+## 🏥 扩展应用：医药临床试验分析框架（新增）
+
+本项目建立的分析方法论已成功迁移至**医药临床试验**场景，形成完整的II期试验数据分析框架：
+
 ## 🛠️ 技术栈
 
 ### 第一阶段：SQL分析
@@ -116,6 +123,8 @@ titanic-sql-analysis/
 05_gender_pclass_heatmap.png # 性别×舱位热力图 │ │ └── 
 06_family_size.png # 家庭规模趋势（倒U型曲线） │ └── 
 sql_vs_pandas_comparison.md # 《SQL vs Pandas 工具对比指南》 │
+├── 扩展应用/（新增） │ 
+└── medical_analysis_framework.md # 《从Titanic到医药临床试验的分析框架迁移指南》 │
 └── data/  └── train.csv # Titanic数据集（Kaggle来源）
 
 
@@ -144,6 +153,7 @@ jupyter notebook titanic_pandas_analysis.ipynb
 2. **再运行Pandas复现**：对比两种工具的语法差异和适用场景
 3. **重点研究可视化**：这是SQL无法完成的环节，也是数据洞察的关键
 4. **阅读对比指南**：建立工具选择直觉，形成协同工作流
+5. **扩展至专业领域**：参考医药临床试验框架，迁移至你的业务场
 
 ## 🤝 协作记录
 
@@ -156,6 +166,7 @@ jupyter notebook titanic_pandas_analysis.ipynb
 | Pandas复现 | 运行代码反馈结果 | 生成Jupyter代码 | titanic_pandas_analysis.ipynb |
 | 可视化 | 选择图表类型 | 生成Matplotlib/Seaborn代码 | 6组高清图表 |
 | 工具对比 | 提供实践反馈 | 整理对比指南 | sql_vs_pandas_comparison.md |
+| 框架迁移 | 提供业务场景 | 设计映射方案| medical_analysis_framework.md|
 
 
-项目意义：通过Titanic这个经典数据集，完整实践了从"数据提取(SQL)"到"深度分析(Pandas)"再到"洞察可视化"的现代数据分析流程，为药企市场部分析岗位的复杂场景（销售数据分析、医生画像、竞品监测）建立了工具能力基础。
+项目意义：通过Titanic这个经典数据集，完整实践了从"数据提取(SQL)"到"深度分析(Pandas)"再到"洞察可视化"的现代数据分析流程。更重要的是，建立了一套可迁移的分析方法论，成功应用于医药临床试验等真实业务场景，为数据分析师的职业能力构建提供了从"学习"到"应用"的完整路径。
